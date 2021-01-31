@@ -1,0 +1,13 @@
+apiVersion: redhatcop.redhat.io/v1alpha1
+kind: NodeScalingWatermark
+metadata:
+  name: us-west-2a
+spec:
+  # Add fields here
+  watermarkPercentage: 20
+  nodeSelector:
+    topology.kubernetes.io/zone: us-west-2a
+  
+
+
+    

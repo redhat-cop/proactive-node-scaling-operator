@@ -1,0 +1,14 @@
+apiVersion: redhatcop.redhat.io/v1alpha1
+kind: NodeScalingWatermark
+metadata:
+  name: ai-ml
+spec:
+  # Add fields here
+  watermarkPercentage: 20
+  nodeSelector:
+    machine.openshift.io/cluster-api-machine-type: ai-ml
+  tolerations:
+  - key: "workload"
+    operator: "Equal"
+    value: "ai-ml"
+    effect: "NoSchedule"  

@@ -1,0 +1,41 @@
+# expected merge structure
+# .NodeScalingWatermark
+# .Replicas
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .NodeScalingWatermark.Name }}
+  namespace: {{ .NodeScalingWatermark.Namespace }} 
+  labels:
+    watermark: {{ .NodeScalingWatermark.Name }}
+spec:
+  replicas: {{ .Replicas }}
+  selector:
+    matchLabels:
+      watermark: {{ .NodeScalingWatermark.Name }}
+  template:
+    metadata:
+      labels:
+        watermark: {{ .NodeScalingWatermark.Name }}
+        proactive-node-scaling-operator.redhat-cop.io/watermark: ""
+    spec:
+      enableServiceLinks: false
+      {{- with .NodeScalingWatermark.Spec.NodeSelector }}
+      nodeSelector: 
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .NodeScalingWatermark.Spec.Tolerations }}
+      tolerations: 
+        {{- toYaml . | nindent 8 }}
+      {{- end }}        
+      priority: 0
+      automountServiceAccountToken: false  
+      containers:
+      - name: pause
+        image: k8s.gcr.io/pause
+      {{- with .NodeScalingWatermark.Spec.PausePodSize }}
+        resources:
+          requests:
+            {{- toYaml . | nindent 12 }}
+      {{- end }}      
+
