@@ -1,7 +1,0 @@
-apiVersion: redhatcop.redhat.io/v1alpha1
-kind: NodeScalingWatermark
-metadata:
-  name: nodescalingwatermark-sample
-spec:
-  # Add fields here
-  foo: bar
