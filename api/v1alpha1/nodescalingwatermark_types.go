@@ -50,6 +50,11 @@ type NodeScalingWatermarkSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default:={memory: "200Mi",cpu: "200m"}
 	PausePodSize corev1.ResourceList `json:"pausePodSize"`
+
+	// Priority is the priority assigne dto the pause pods, if not set it will be default to 0
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:=0
+	Priority int `json:"priority"`
 }
 
 // NodeScalingWatermarkStatus defines the observed state of NodeScalingWatermark

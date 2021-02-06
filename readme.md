@@ -24,9 +24,10 @@ metadata:
 value: 1000
 globalDefault: true
 description: "This priority classis the cluster default and should be used for normal workloads."
+priority: 0
 ```
 
-The low priority pods scheduled by this operator always have priority 0, so they should always have lower priority than anything else.
+The low priority pods scheduled by this operator will have the priority defined in the `priority` field (0 by default). The sleected prioorty should be very low so to be lower than anything else running in the cluster.
 
 Also for this operator to work the [cluster autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler) must be active, see OpenShift instructions [here](https://docs.openshift.com/container-platform/4.6/machine_management/applying-autoscaling.html) on how to turn it on.
 
