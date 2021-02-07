@@ -36,7 +36,7 @@ type NodeScalingWatermarkSpec struct {
 	// +kubebuilder:validation:Minimum=1
 	WatermarkPercentage int `json:"watermarkPercentage"`
 
-	// NodeSelector for the nodes for which the waetrmak will be calculated. These nodes should be controller by an autoscaler.
+	// NodeSelector for the nodes for which the watermark will be calculated. These nodes should be controlled by an autoscaler.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default:={node-role.kubernetes.io/worker:""}
 	NodeSelector map[string]string `json:"nodeSelector"`
@@ -46,10 +46,15 @@ type NodeScalingWatermarkSpec struct {
 	// +kubebuilder:validation:Optional
 	Tolerations []corev1.Toleration `json:"tolerations,omitempty"`
 
-	// PausePodSize is size of the pause pods used to mark the watermark, smaller pods will distribyte better but consume slighlty more resuorces. Tuning may be required to find the optimal size.
+	// PausePodSize is size of the pause pods used to mark the watermark, smaller pods will distributed better but consume slightly more resources. Tuning may be required to find the optimal size.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default:={memory: "200Mi",cpu: "200m"}
 	PausePodSize corev1.ResourceList `json:"pausePodSize"`
+
+	// Priority is the priority assigned to the pause pods, if not set it will be default to 0
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:=0
+	Priority int `json:"priority"`
 }
 
 // NodeScalingWatermarkStatus defines the observed state of NodeScalingWatermark
