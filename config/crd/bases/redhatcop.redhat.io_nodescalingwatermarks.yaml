@@ -42,8 +42,8 @@ spec:
                   type: string
                 default:
                   node-role.kubernetes.io/worker: ""
-                description: NodeSelector for the nodes for which the waetrmak will
-                  be calculated. These nodes should be controller by an autoscaler.
+                description: NodeSelector for the nodes for which the watermark will
+                  be calculated. These nodes should be controlled by an autoscaler.
                 type: object
               pausePodSize:
                 additionalProperties:
@@ -56,9 +56,14 @@ spec:
                   cpu: 200m
                   memory: 200Mi
                 description: PausePodSize is size of the pause pods used to mark the
-                  watermark, smaller pods will distribyte better but consume slighlty
-                  more resuorces. Tuning may be required to find the optimal size.
+                  watermark, smaller pods will distributed better but consume slightly
+                  more resources. Tuning may be required to find the optimal size.
                 type: object
+              priority:
+                default: 0
+                description: Priority is the priority assigned to the pause pods,
+                  if not set it will be default to 0
+                type: integer
               tolerations:
                 items:
                   description: The pod this Toleration is attached to tolerates any
