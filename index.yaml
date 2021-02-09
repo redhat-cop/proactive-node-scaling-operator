@@ -1,0 +1,21 @@
+apiVersion: v1
+entries:
+  proactive-node-scaling-operator:
+  - apiVersion: v1
+    appVersion: v0.1.0
+    created: "2021-02-09T03:31:48.844810229Z"
+    description: Helm chart that deploys proactive-node-scaling-operator
+    digest: c994ab9f4fad914c49410b85e1c33245a8e1e925bcd81b3dd844caf827ea7d5d
+    keywords:
+    - volume
+    - storage
+    - csi
+    - expansion
+    - monitoring
+    name: proactive-node-scaling-operator
+    sources:
+    - https://github.com/redhat-cop/proactive-node-scaling-operator
+    urls:
+    - https://redhat-cop.github.io/proactive-node-scaling-operator/proactive-node-scaling-operator/proactive-node-scaling-operator-v0.1.0.tgz
+    version: v0.1.0
+generated: "2021-02-09T03:31:48.844169628Z"
