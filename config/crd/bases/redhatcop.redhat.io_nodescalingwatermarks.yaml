@@ -45,6 +45,9 @@ spec:
                 description: NodeSelector for the nodes for which the watermark will
                   be calculated. These nodes should be controlled by an autoscaler.
                 type: object
+              pausePodImage:
+                default: k8s.gcr.io/pause
+                type: string
               pausePodSize:
                 additionalProperties:
                   anyOf:

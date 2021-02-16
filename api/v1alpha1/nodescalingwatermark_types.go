@@ -51,6 +51,10 @@ type NodeScalingWatermarkSpec struct {
 	// +kubebuilder:default:={memory: "200Mi",cpu: "200m"}
 	PausePodSize corev1.ResourceList `json:"pausePodSize"`
 
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:="k8s.gcr.io/pause"
+	PausePodImage string `json:"pausePodImage"`
+
 	// Priority is the priority assigned to the pause pods, if not set it will be default to 0
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default:=0

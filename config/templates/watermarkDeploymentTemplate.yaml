@@ -32,7 +32,7 @@ spec:
       automountServiceAccountToken: false  
       containers:
       - name: pause
-        image: k8s.gcr.io/pause
+        image: {{ .NodeScalingWatermark.Spec.PausePodImage }}
       {{- with .NodeScalingWatermark.Spec.PausePodSize }}
         resources:
           requests:
