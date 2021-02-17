@@ -69,7 +69,7 @@ type templateData struct {
 // +kubebuilder:rbac:groups=redhatcop.redhat.io,resources=nodescalingwatermarks/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=redhatcop.redhat.io,resources=nodescalingwatermarks/finalizers,verbs=update
 // +kubebuilder:rbac:groups="",resources=nodes;pods,verbs=get;list;watch
-// +kubebuilder:rbac:groups="apps",resources=deployments,verbs=get;list;watch
+// +kubebuilder:rbac:groups="apps",resources=deployments,verbs=get;list;watch;create;update;patch;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.

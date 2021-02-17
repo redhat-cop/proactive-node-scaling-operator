@@ -102,6 +102,10 @@ helm repo update
 helm upgrade proactive-node-scaling-operator proactive-node-scaling-operator/proactive-node-scaling-operator
 ```
 
+### Disconnected deployment
+
+Use the `PausePodImage` field of the `NodeScalingWatermark` to specify an internally mirrored pause pod image, when running in a disconnected environment.
+
 ## Development
 
 ### Running the operator locally
@@ -177,3 +181,4 @@ git push upstream -f <tagname>
 operator-sdk cleanup proactive-node-scaling-operator -n proactive-node-scaling-operator
 oc delete operatorgroup operator-sdk-og
 oc delete catalogsource proactive-node-scaling-operator-catalog
+```
