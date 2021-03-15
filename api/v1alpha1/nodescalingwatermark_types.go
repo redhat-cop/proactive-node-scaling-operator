@@ -55,10 +55,10 @@ type NodeScalingWatermarkSpec struct {
 	// +kubebuilder:default:="k8s.gcr.io/pause"
 	PausePodImage string `json:"pausePodImage"`
 
-	// Priority is the priority assigned to the pause pods, if not set it will be default to 0
+	// PriorityClassName is the priorityClassName assigned to the pause pods, if not set it will be default to low-priority
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default:=0
-	Priority int `json:"priority"`
+	// +kubebuilder:default:=low-priority
+	PriorityClassName string `json:"priorityClassName"`
 }
 
 // NodeScalingWatermarkStatus defines the observed state of NodeScalingWatermark

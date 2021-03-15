@@ -20,14 +20,21 @@ In order for this operator to work correctly [pod priorities](https://kubernetes
 apiVersion: scheduling.k8s.io/v1
 kind: PriorityClass
 metadata:
+  name: low-priority
+value: 0
+globalDefault: false
+description: "This priority class is is the low-priority class for Proactive Node Scaling."
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
   name: normal-workload
 value: 1000
 globalDefault: true
 description: "This priority classis the cluster default and should be used for normal workloads."
-priority: 0
 ```
 
-The low priority pods scheduled by this operator will have the priority defined in the `priority` field (0 by default). The sleected prioorty should be very low so to be lower than anything else running in the cluster.
+The low-priority pods scheduled by this operator always have priority 0, so they should always have lower priority than anything else.
 
 Also for this operator to work the [cluster autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler) must be active, see OpenShift instructions [here](https://docs.openshift.com/container-platform/4.6/machine_management/applying-autoscaling.html) on how to turn it on.
 
@@ -39,6 +46,7 @@ kind: NodeScalingWatermark
 metadata:
   name: us-west-2a
 spec:
+  priorityClassName: low-priority
   watermarkPercentage: 20
   nodeSelector:
     topology.kubernetes.io/zone: us-west-2a

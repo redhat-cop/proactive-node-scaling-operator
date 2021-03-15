@@ -28,7 +28,7 @@ spec:
       tolerations: 
         {{- toYaml . | nindent 8 }}
       {{- end }}        
-      priority: {{ .NodeScalingWatermark.Spec.Priority }}
+      priorityClassName: {{ .NodeScalingWatermark.Spec.PriorityClassName }}
       automountServiceAccountToken: false  
       containers:
       - name: pause
