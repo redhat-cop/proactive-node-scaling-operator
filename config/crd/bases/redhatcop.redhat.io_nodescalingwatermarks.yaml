@@ -63,10 +63,9 @@ spec:
                   more resources. Tuning may be required to find the optimal size.
                 type: object
               priorityClassName:
-                default: low-priority
-                description: PriorityClassName is the priorityClassName assigned to the 
-                pause pods, if not set it will be default to 'low-priority'. You may 
-                have to create this class first and set the priority to 0.
+                default: proactive-node-autoscaling-pods
+                description: PriorityClassName is the priorityClassName assigned to
+                  the pause pods, if not set it will be default to proactive-node-autoscaling-pods
                 type: string
               tolerations:
                 items:

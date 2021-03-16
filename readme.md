@@ -14,16 +14,18 @@ The Proactive Node Scaling Operator improves the user experience by allocating l
 
 Essentially this operator allows you to trade wasted resources for faster response time.
 
-In order for this operator to work correctly [pod priorities](https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/) must be defined. Here is an example of how to do so:
+In order for this operator to work correctly [pod priorities](https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/) must be defined. The default name for the priority class used by this operator is "proactive-node-autoscaling-pods" and it should have the lowest possible priority, 0. To ensure your regular workloads get a normal priority you should also define a PriorityClass for those and set globalDefault to true.
+
+For example:
 
 ```yaml
 apiVersion: scheduling.k8s.io/v1
 kind: PriorityClass
 metadata:
-  name: low-priority
+  name: proactive-node-autoscaling-pods
 value: 0
 globalDefault: false
-description: "This priority class is is the low-priority class for Proactive Node Scaling."
+description: "This priority class is is the Priority class for Proactive Node Scaling."
 ---
 apiVersion: scheduling.k8s.io/v1
 kind: PriorityClass
@@ -33,8 +35,6 @@ value: 1000
 globalDefault: true
 description: "This priority classis the cluster default and should be used for normal workloads."
 ```
-
-The low-priority pods scheduled by this operator always have priority 0, so they should always have lower priority than anything else.
 
 Also for this operator to work the [cluster autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler) must be active, see OpenShift instructions [here](https://docs.openshift.com/container-platform/4.6/machine_management/applying-autoscaling.html) on how to turn it on.
 
@@ -46,7 +46,7 @@ kind: NodeScalingWatermark
 metadata:
   name: us-west-2a
 spec:
-  priorityClassName: low-priority
+  priorityClassName: proactive-node-autoscaling-pods
   watermarkPercentage: 20
   nodeSelector:
     topology.kubernetes.io/zone: us-west-2a

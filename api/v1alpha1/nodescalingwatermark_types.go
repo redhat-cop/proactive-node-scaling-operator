@@ -55,9 +55,9 @@ type NodeScalingWatermarkSpec struct {
 	// +kubebuilder:default:="k8s.gcr.io/pause"
 	PausePodImage string `json:"pausePodImage"`
 
-	// PriorityClassName is the priorityClassName assigned to the pause pods, if not set it will be default to low-priority
+	// PriorityClassName is the priorityClassName assigned to the pause pods, if not set it will be default to proactive-node-autoscaling-pods
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default:=low-priority
+	// +kubebuilder:default:=proactive-node-autoscaling-pods
 	PriorityClassName string `json:"priorityClassName"`
 }
 
