@@ -62,11 +62,11 @@ spec:
                   watermark, smaller pods will distributed better but consume slightly
                   more resources. Tuning may be required to find the optimal size.
                 type: object
-              priority:
-                default: 0
-                description: Priority is the priority assigned to the pause pods,
-                  if not set it will be default to 0
-                type: integer
+              priorityClassName:
+                default: proactive-node-autoscaling-pods
+                description: PriorityClassName is the priorityClassName assigned to
+                  the pause pods, if not set it will be default to proactive-node-autoscaling-pods
+                type: string
               tolerations:
                 items:
                   description: The pod this Toleration is attached to tolerates any
