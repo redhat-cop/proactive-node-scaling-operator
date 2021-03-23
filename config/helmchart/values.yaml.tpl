@@ -16,19 +16,19 @@ fullnameOverride: ""
 
 serviceAccount:
   # Specifies whether a service account should be created
-  create: true
+  create: false
   # Annotations to add to the service account
   annotations: {}
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
-  name: ""
+  name: "default"
 
 podAnnotations: {}
 
 resources:
-  limits:
-    cpu: 100m
-    memory: 30Mi
+  #limits:
+  #  cpu: 100m
+  #  memory: 30Mi
   requests:
     cpu: 100m
     memory: 20Mi
