@@ -206,7 +206,7 @@ func (r *NodeScalingWatermarkReconciler) filterWatermarkAndSystemPods(pods []cor
 	filteredPods := []corev1.Pod{}
 	for i := range pods {
 		_, ok := pods[i].Labels[watermarkLabel]
-		if strings.HasPrefix(pods[i].Namespace, "kube-") || strings.HasPrefix(pods[i].Namespace, "openshift-") || pods[i].Namespace == "default" || ok {
+		if strings.HasPrefix(pods[i].Namespace, "kube-") || strings.HasPrefix(pods[i].Namespace, "openshift-") || pods[i].Namespace == "default" || ok || util.IsBeingDeleted(&pods[i]) {
 			continue
 		}
 		filteredPods = append(filteredPods, pods[i])
