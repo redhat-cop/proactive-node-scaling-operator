@@ -26,9 +26,6 @@ serviceAccount:
 podAnnotations: {}
 
 resources:
-  #limits:
-  #  cpu: 100m
-  #  memory: 30Mi
   requests:
     cpu: 100m
     memory: 20Mi
