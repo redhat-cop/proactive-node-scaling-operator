@@ -21,13 +21,12 @@ spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
-      {{- end }}
-      serviceAccountName: {{ include "proactive-node-scaling-operator.serviceAccountName" . }}    
+      {{- end }}  
       containers:
       - command:
         - /manager
         args:
-        - '--leader-elect'
+        - --leader-elect
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         name: {{ .Chart.Name }}
@@ -37,22 +36,14 @@ spec:
           httpGet:
             path: /healthz
             port: 8081
-            scheme: HTTP
           initialDelaySeconds: 15
-          timeoutSeconds: 1
           periodSeconds: 20
-          successThreshold: 1
-          failureThreshold: 3
         readinessProbe:
           httpGet:
             path: /readyz
             port: 8081
-            scheme: HTTP
           initialDelaySeconds: 5
-          timeoutSeconds: 1
-          periodSeconds: 10
-          successThreshold: 1
-          failureThreshold: 3
+          periodSeconds: 10          
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
