@@ -128,6 +128,29 @@ oc login --token ${token}
 make run ENABLE_WEBHOOKS=false
 ```
 
+### Test helm chart locally
+
+Define an image and tag. For example...
+
+```shell
+export imageRepository="quay.io/redhat-cop/proactive-node-scaling-operator"
+export imageTag="v0.3.1"
+```
+
+Deploy chart...
+
+```shell
+make helmchart
+helm upgrade -i proactive-node-scaling-operator-helmchart-test charts/proactive-node-scaling-operator -n proactive-node-scaling-operator-local --set image.repository=${imageRepository} --set image.tag=${imageTag} --create-namespace
+```
+
+Delete...
+
+```shell
+helm delete proactive-node-scaling-operator-helmchart-test -n proactive-node-scaling-operator-local
+kubectl delete -f charts/proactive-node-scaling-operator/crds/crds.yaml
+```
+
 ### Building/Pushing the operator image
 
 ```shell
