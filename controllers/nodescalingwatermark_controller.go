@@ -169,7 +169,7 @@ func (r *NodeScalingWatermarkReconciler) getNeededReplicas(instance *redhatcopv1
 		if !ok {
 			continue
 		}
-		neededReplicas := totalQuantity.AsApproximateFloat64() * float64(100-instance.Spec.WatermarkPercentage) / 100 / podQuantity.AsApproximateFloat64()
+		neededReplicas := totalQuantity.AsApproximateFloat64() * float64(instance.Spec.WatermarkPercentage) / 100 / podQuantity.AsApproximateFloat64()
 		replicas = math.Max(replicas, neededReplicas)
 	}
 	return int64(replicas)
