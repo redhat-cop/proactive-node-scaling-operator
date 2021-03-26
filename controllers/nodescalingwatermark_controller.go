@@ -80,7 +80,6 @@ type templateData struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.7.0/pkg/reconcile
 func (r *NodeScalingWatermarkReconciler) Reconcile(context context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("nodescalingwatermark", req.NamespacedName)
-	log.V(1).Info("reconcile called")
 	// Fetch the EgressIPAM instance
 	instance := &redhatcopv1alpha1.NodeScalingWatermark{}
 	err := r.GetClient().Get(context, req.NamespacedName, instance)
@@ -401,7 +400,6 @@ func (e *enqueForScalingWatermarksSelectingNodeHostingPod) processReferringNodeS
 				Namespace: nodeScalingWatermark.GetNamespace(),
 				Name:      nodeScalingWatermark.GetName(),
 			}})
-			e.log.V(1).Info("queue", "lenght", q.Len())
 		}
 	}
 }
