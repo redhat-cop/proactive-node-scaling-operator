@@ -29,8 +29,6 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/redhat-cop/operator-utils/pkg/util"
 	"github.com/redhat-cop/operator-utils/pkg/util/lockedresourcecontroller"
-	"github.com/redhat-cop/operator-utils/pkg/util/lockedresourcecontroller/lockedpatch"
-	"github.com/redhat-cop/operator-utils/pkg/util/lockedresourcecontroller/lockedresource"
 	redhatcopv1alpha1 "github.com/redhat-cop/proactive-node-scaling-operator/api/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -82,7 +80,6 @@ type templateData struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.7.0/pkg/reconcile
 func (r *NodeScalingWatermarkReconciler) Reconcile(context context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("nodescalingwatermark", req.NamespacedName)
-
 	// Fetch the EgressIPAM instance
 	instance := &redhatcopv1alpha1.NodeScalingWatermark{}
 	err := r.GetClient().Get(context, req.NamespacedName, instance)
@@ -141,27 +138,26 @@ func (r *NodeScalingWatermarkReconciler) Reconcile(context context.Context, req 
 		return r.ManageError(context, instance, err)
 	}
 
-	err = r.UpdateLockedResources(context, instance, []lockedresource.LockedResource{
-		{
-			Unstructured: *obj,
-			ExcludedPaths: []string{
-				".metadata",
-				".status",
-			},
-		},
-	}, []lockedpatch.LockedPatch{})
+	// err = r.UpdateLockedResources(context, instance, []lockedresource.LockedResource{
+	// 	{
+	// 		Unstructured: *obj,
+	// 		ExcludedPaths: []string{
+	// 			".metadata",
+	// 			".status",
+	// 		},
+	// 	},
+	// }, []lockedpatch.LockedPatch{})
+	// if err != nil {
+	// 	log.Error(err, "unable to update locked resources")
+	// 	return r.ManageError(context, instance, err)
+	// }
+
+	err = r.CreateOrUpdateResource(context, instance, instance.GetNamespace(), obj)
 	if err != nil {
-		log.Error(err, "unable to update locked resources")
+		log.Error(err, "unable to create or update resource", "resource", obj)
 		return r.ManageError(context, instance, err)
 	}
 
-	// for _, obj := range *objs {
-	// 	err = r.CreateOrUpdateResource(context, instance, instance.GetNamespace(), &obj)
-	// 	if err != nil {
-	// 		log.Error(err, "unable to create or update resource", "resource", obj)
-	// 		return r.ManageError(context, instance, err)
-	// 	}
-	// }
 	return r.ManageSuccess(context, instance)
 }
 
@@ -172,7 +168,7 @@ func (r *NodeScalingWatermarkReconciler) getNeededReplicas(instance *redhatcopv1
 		if !ok {
 			continue
 		}
-		neededReplicas := totalQuantity.AsApproximateFloat64() * float64(100-instance.Spec.WatermarkPercentage) / 100 / podQuantity.AsApproximateFloat64()
+		neededReplicas := totalQuantity.AsApproximateFloat64() * float64(instance.Spec.WatermarkPercentage) / 100 / podQuantity.AsApproximateFloat64()
 		replicas = math.Max(replicas, neededReplicas)
 	}
 	return int64(replicas)
@@ -206,7 +202,7 @@ func (r *NodeScalingWatermarkReconciler) filterWatermarkAndSystemPods(pods []cor
 	filteredPods := []corev1.Pod{}
 	for i := range pods {
 		_, ok := pods[i].Labels[watermarkLabel]
-		if strings.HasPrefix(pods[i].Namespace, "kube-") || strings.HasPrefix(pods[i].Namespace, "openshift-") || pods[i].Namespace == "default" || ok {
+		if strings.HasPrefix(pods[i].Namespace, "kube-") || strings.HasPrefix(pods[i].Namespace, "openshift-") || pods[i].Namespace == "default" || ok || util.IsBeingDeleted(&pods[i]) {
 			continue
 		}
 		filteredPods = append(filteredPods, pods[i])
@@ -297,14 +293,15 @@ func (r *NodeScalingWatermarkReconciler) SetupWithManager(mgr ctrl.Manager) erro
 			}
 			oldRequest := getTotalRequests(oldPod)
 			newRequest := getTotalRequests(newPod)
-
-			return !reflect.DeepEqual(oldRequest, newRequest)
+			return !reflect.DeepEqual(oldRequest, newRequest) || (len(newRequest) > 0 && (oldPod.Spec.NodeName != newPod.Spec.NodeName || oldPod.ObjectMeta.DeletionTimestamp != newPod.ObjectMeta.DeletionTimestamp))
 		},
 		CreateFunc: func(e event.CreateEvent) bool {
-			return true
+			pod, ok := e.Object.(*corev1.Pod)
+			return ok && pod.Spec.NodeName != "" && len(getTotalRequests(pod)) > 0
 		},
 		DeleteFunc: func(e event.DeleteEvent) bool {
-			return true
+			pod, ok := e.Object.(*corev1.Pod)
+			return ok && len(getTotalRequests(pod)) > 0
 		},
 		GenericFunc: func(e event.GenericEvent) bool {
 			return false
@@ -400,7 +397,8 @@ func (e *enqueForScalingWatermarksSelectingNodeHostingPod) processReferringNodeS
 		labelSelector := labels.SelectorFromSet(nodeScalingWatermark.Spec.NodeSelector)
 		if labelSelector.Matches(labels.Set(node.Labels)) {
 			q.Add(reconcile.Request{NamespacedName: types.NamespacedName{
-				Name: nodeScalingWatermark.GetName(),
+				Namespace: nodeScalingWatermark.GetNamespace(),
+				Name:      nodeScalingWatermark.GetName(),
 			}})
 		}
 	}
