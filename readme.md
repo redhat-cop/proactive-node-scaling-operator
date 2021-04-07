@@ -4,13 +4,13 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/redhat-cop/proactive-node-scaling-operator)](https://goreportcard.com/report/github.com/redhat-cop/proactive-node-scaling-operator)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/redhat-cop/proactive-node-scaling-operator)
 
-This operator makes the [cluster autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler) more proactive. As of now the cluster auto scaler will create new nodes only when a pod is pending because it cannot be allocated due to lack of capacity. This is not a goos user experience as the pending workload has to wait for several minutes as the new node is create and joins the cluster.
+This operator makes the [cluster autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler) more proactive. As of now the cluster auto scaler will create new nodes only when a pod is pending because it cannot be allocated due to lack of capacity. This is not a good user experience as the pending workload has to wait for several minutes as the new node is create and joins the cluster.
 
 The Proactive Node Scaling Operator improves the user experience by allocating low priority pods that don't do anything. When the cluster is full and a new user pod is created the following happens:
 
 1. some of the low priority pods are de-scheduled to make room for the user pod, which can then be scheduled. The user workload does not have to wait in this case.
 
-2. the de-scheduled low priority pods are rescheduled and in doing so the trigger the cluster autoscaler to add new nodes.
+2. the de-scheduled low priority pods are rescheduled and in doing so, trigger the cluster autoscaler to add new nodes.
 
 Essentially this operator allows you to trade wasted resources for faster response time.
 
@@ -68,7 +68,7 @@ If you want to utilize the Operator Lifecycle Manager (OLM) to install this oper
 
 #### Deploying from OperatorHub UI
 
-* If you would like to launch this operator from the UI, you'll need to navigate to the OperatorHub tab in the console. Before starting, make sure you've created the namespace that you want to install this operator to with the following:
+* If you would like to launch this operator from the UI, you'll need to navigate to the OperatorHub tab in the console. Before starting, make sure you've created the namespace that you want to install this operator in by running the following:
 
 ```shell
 oc new-project proactive-node-scaling-operator
