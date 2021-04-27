@@ -2,8 +2,25 @@ apiVersion: v1
 entries:
   proactive-node-scaling-operator:
   - apiVersion: v1
+    appVersion: v0.3.3
+    created: "2021-04-27T14:58:20.068438955Z"
+    description: Helm chart that deploys proactive-node-scaling-operator
+    digest: 464794be37fd6de60ac968daca7a2f22fc7ebdd3d86055df8da41f8136e8a6e7
+    keywords:
+    - volume
+    - storage
+    - csi
+    - expansion
+    - monitoring
+    name: proactive-node-scaling-operator
+    sources:
+    - https://github.com/redhat-cop/proactive-node-scaling-operator
+    urls:
+    - https://redhat-cop.github.io/proactive-node-scaling-operator/proactive-node-scaling-operator/proactive-node-scaling-operator-v0.3.3.tgz
+    version: v0.3.3
+  - apiVersion: v1
     appVersion: v0.3.2
-    created: "2021-03-26T00:33:38.567810892Z"
+    created: "2021-04-27T14:58:20.067968752Z"
     description: Helm chart that deploys proactive-node-scaling-operator
     digest: f23ac5be333dbd1deeebf386fe326cab18fa4714f59234b389ae783accd4f639
     keywords:
@@ -20,7 +37,7 @@ entries:
     version: v0.3.2
   - apiVersion: v1
     appVersion: v0.3.1
-    created: "2021-03-26T00:33:38.566890508Z"
+    created: "2021-04-27T14:58:20.067527049Z"
     description: Helm chart that deploys proactive-node-scaling-operator
     digest: c73f03d33ae43bb77722653a38cc3a6e00634baa8a6d15797c95b5201adfc93f
     keywords:
@@ -37,7 +54,7 @@ entries:
     version: v0.3.1
   - apiVersion: v1
     appVersion: v0.3.0
-    created: "2021-03-26T00:33:38.566270319Z"
+    created: "2021-04-27T14:58:20.067154047Z"
     description: Helm chart that deploys proactive-node-scaling-operator
     digest: fb7a2639d3d64f7a64699fb066b5e1caffd094822bfb9f24e967dae0c974a409
     keywords:
@@ -54,7 +71,7 @@ entries:
     version: v0.3.0
   - apiVersion: v1
     appVersion: v0.2.0
-    created: "2021-03-26T00:33:38.565610531Z"
+    created: "2021-04-27T14:58:20.066766644Z"
     description: Helm chart that deploys proactive-node-scaling-operator
     digest: 69ce8f697c7142abf6b36c45887c544362896427e13b22e6592b72c1cc65bb34
     keywords:
@@ -71,7 +88,7 @@ entries:
     version: v0.2.0
   - apiVersion: v1
     appVersion: v0.1.0
-    created: "2021-03-26T00:33:38.565223437Z"
+    created: "2021-04-27T14:58:20.066338941Z"
     description: Helm chart that deploys proactive-node-scaling-operator
     digest: c994ab9f4fad914c49410b85e1c33245a8e1e925bcd81b3dd844caf827ea7d5d
     keywords:
@@ -86,4 +103,4 @@ entries:
     urls:
     - https://redhat-cop.github.io/proactive-node-scaling-operator/proactive-node-scaling-operator/proactive-node-scaling-operator-v0.1.0.tgz
     version: v0.1.0
-generated: "2021-03-26T00:33:38.559280642Z"
+generated: "2021-04-27T14:58:20.065543536Z"
