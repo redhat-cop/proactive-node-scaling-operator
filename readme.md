@@ -123,7 +123,7 @@ make install
 export TEMPLATE_FILE_NAME=./config/templates/watermarkDeploymentTemplate.yaml
 oc new-project proactive-node-scaling-operator-local
 kustomize build ./config/local-development | oc apply -f - -n proactive-node-scaling-operator-local
-export token=$(oc serviceaccounts get-token 'default' -n proactive-node-scaling-operator-local)
+export token=$(oc serviceaccounts get-token 'proactive-node-scaling-operator-controller-manager' -n proactive-node-scaling-operator-local)
 oc login --token ${token}
 make run ENABLE_WEBHOOKS=false
 ```
@@ -134,7 +134,7 @@ Define an image and tag. For example...
 
 ```shell
 export imageRepository="quay.io/redhat-cop/proactive-node-scaling-operator"
-export imageTag="v0.3.1"
+export imageTag="$(git describe --tags --abbrev=0)" # grabs the most recent git tag, which should match the image tag
 ```
 
 Deploy chart...

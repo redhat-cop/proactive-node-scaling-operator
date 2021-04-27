@@ -3,11 +3,12 @@ layout: go.kubebuilder.io/v3
 projectName: proactive-node-scaling-operator
 repo: github.com/redhat-cop/proactive-node-scaling-operator
 resources:
-- crdVersion: v1
+- api:
+    crdVersion: v1
   group: redhatcop
   kind: NodeScalingWatermark
   version: v1alpha1
-version: 3-alpha
+version: "3"
 plugins:
   manifests.sdk.operatorframework.io/v2: {}
   scorecard.sdk.operatorframework.io/v2: {}
