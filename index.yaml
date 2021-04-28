@@ -3,9 +3,9 @@ entries:
   proactive-node-scaling-operator:
   - apiVersion: v1
     appVersion: v0.3.3
-    created: "2021-04-28T01:40:23.785859796Z"
+    created: "2021-04-28T19:31:29.463346561Z"
     description: Helm chart that deploys proactive-node-scaling-operator
-    digest: 304c600dc2abe3328091d293b4b3f9b00d7ce7ab021067c85d2d031e400254a1
+    digest: fb61f2e070e8a8fad3c00bfd9afbc0f9df4ee751e20cf94ce4624a99c328cbb0
     keywords:
     - volume
     - storage
@@ -20,7 +20,7 @@ entries:
     version: v0.3.3
   - apiVersion: v1
     appVersion: v0.3.2
-    created: "2021-04-28T01:40:23.785488393Z"
+    created: "2021-04-28T19:31:29.461995756Z"
     description: Helm chart that deploys proactive-node-scaling-operator
     digest: f23ac5be333dbd1deeebf386fe326cab18fa4714f59234b389ae783accd4f639
     keywords:
@@ -37,7 +37,7 @@ entries:
     version: v0.3.2
   - apiVersion: v1
     appVersion: v0.3.1
-    created: "2021-04-28T01:40:23.78503249Z"
+    created: "2021-04-28T19:31:29.461417953Z"
     description: Helm chart that deploys proactive-node-scaling-operator
     digest: c73f03d33ae43bb77722653a38cc3a6e00634baa8a6d15797c95b5201adfc93f
     keywords:
@@ -54,7 +54,7 @@ entries:
     version: v0.3.1
   - apiVersion: v1
     appVersion: v0.3.0
-    created: "2021-04-28T01:40:23.784705688Z"
+    created: "2021-04-28T19:31:29.460894251Z"
     description: Helm chart that deploys proactive-node-scaling-operator
     digest: fb7a2639d3d64f7a64699fb066b5e1caffd094822bfb9f24e967dae0c974a409
     keywords:
@@ -71,7 +71,7 @@ entries:
     version: v0.3.0
   - apiVersion: v1
     appVersion: v0.2.0
-    created: "2021-04-28T01:40:23.784386785Z"
+    created: "2021-04-28T19:31:29.453820723Z"
     description: Helm chart that deploys proactive-node-scaling-operator
     digest: 69ce8f697c7142abf6b36c45887c544362896427e13b22e6592b72c1cc65bb34
     keywords:
@@ -88,7 +88,7 @@ entries:
     version: v0.2.0
   - apiVersion: v1
     appVersion: v0.1.0
-    created: "2021-04-28T01:40:23.784047483Z"
+    created: "2021-04-28T19:31:29.453397221Z"
     description: Helm chart that deploys proactive-node-scaling-operator
     digest: c994ab9f4fad914c49410b85e1c33245a8e1e925bcd81b3dd844caf827ea7d5d
     keywords:
@@ -103,4 +103,4 @@ entries:
     urls:
     - https://redhat-cop.github.io/proactive-node-scaling-operator/proactive-node-scaling-operator/proactive-node-scaling-operator-v0.1.0.tgz
     version: v0.1.0
-generated: "2021-04-28T01:40:23.783532479Z"
+generated: "2021-04-28T19:31:29.452728518Z"
