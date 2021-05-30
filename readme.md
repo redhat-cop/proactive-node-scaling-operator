@@ -114,6 +114,14 @@ helm upgrade proactive-node-scaling-operator proactive-node-scaling-operator/pro
 
 Use the `PausePodImage` field of the `NodeScalingWatermark` to specify an internally mirrored pause pod image, when running in a disconnected environment.
 
+## Metrics
+
+Prometheus compatible metrics are exposed by the Operator and can be integrated into OpenShift's default cluster monitoring. To enable OpenShift cluster monitoring, label the namespace the operator is deployed in with the label `openshift.io/cluster-monitoring="true"`.
+
+```shell
+oc label namespace <namespace> openshift.io/cluster-monitoring="true"
+```
+
 ## Development
 
 ### Running the operator locally
@@ -123,7 +131,7 @@ make install
 export TEMPLATE_FILE_NAME=./config/templates/watermarkDeploymentTemplate.yaml
 oc new-project proactive-node-scaling-operator-local
 kustomize build ./config/local-development | oc apply -f - -n proactive-node-scaling-operator-local
-export token=$(oc serviceaccounts get-token 'proactive-node-scaling-operator-controller-manager' -n proactive-node-scaling-operator-local)
+export token=$(oc serviceaccounts get-token 'proactive-node-scaling-controller-manager' -n proactive-node-scaling-operator-local)
 oc login --token ${token}
 make run ENABLE_WEBHOOKS=false
 ```
@@ -168,9 +176,10 @@ make bundle IMG=quay.io/$repo/proactive-node-scaling-operator:latest
 operator-sdk bundle validate ./bundle --select-optional name=operatorhub
 make bundle-build BUNDLE_IMG=quay.io/$repo/proactive-node-scaling-operator-bundle:latest
 docker login quay.io/$repo/proactive-node-scaling-operator-bundle
-podman push quay.io/$repo/proactive-node-scaling-operator-bundle:latest
+docker push quay.io/$repo/proactive-node-scaling-operator-bundle:latest
 operator-sdk bundle validate quay.io/$repo/proactive-node-scaling-operator-bundle:latest --select-optional name=operatorhub
 oc new-project proactive-node-scaling-operator
+oc label namespace proactive-node-scaling-operator openshift.io/cluster-monitoring="true"
 operator-sdk cleanup proactive-node-scaling-operator -n proactive-node-scaling-operator
 operator-sdk run bundle --install-mode AllNamespaces -n proactive-node-scaling-operator quay.io/$repo/proactive-node-scaling-operator-bundle:latest
 ```
@@ -183,6 +192,15 @@ Create the following resource:
 oc new-project proactive-node-scaling-operator-test
 oc apply -f ./test/ai-ml-watermark.yaml -n proactive-node-scaling-operator-test
 oc apply -f ./test/zone-watermark.yaml -n proactive-node-scaling-operator-test
+```
+
+#### Testing metrics
+
+```sh
+export operatorNamespace=proactive-node-scaling-operator-local # or proactive-node-scaling-operator
+oc label namespace ${operatorNamespace} openshift.io/cluster-monitoring="true"
+oc rsh -n openshift-monitoring -c prometheus prometheus-k8s-0 /bin/bash
+curl -v -s -k -H "Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" https://proactive-node-scaling-operator-controller-manager-metrics.${operatorNamespace}.svc.cluster.local:8443/metrics
 ```
 
 ### Releasing
