@@ -25,7 +25,6 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}  
       containers:
-      - command:
       - args:
         - --secure-listen-address=0.0.0.0:8443
         - --upstream=http://127.0.0.1:8080/
@@ -40,7 +39,8 @@ spec:
           name: https
         volumeMounts:
         - mountPath: /etc/certs/tls
-          name: tls-cert          
+          name: tls-cert    
+      - command:
         - /manager
         args:
         - --leader-elect
