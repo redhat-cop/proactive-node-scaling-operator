@@ -200,7 +200,9 @@ oc apply -f ./test/zone-watermark.yaml -n proactive-node-scaling-operator-test
 export operatorNamespace=proactive-node-scaling-operator-local # or proactive-node-scaling-operator
 oc label namespace ${operatorNamespace} openshift.io/cluster-monitoring="true"
 oc rsh -n openshift-monitoring -c prometheus prometheus-k8s-0 /bin/bash
+export operatorNamespace=proactive-node-scaling-operator-local # or proactive-node-scaling-operator
 curl -v -s -k -H "Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" https://proactive-node-scaling-operator-controller-manager-metrics.${operatorNamespace}.svc.cluster.local:8443/metrics
+exit
 ```
 
 ### Releasing
