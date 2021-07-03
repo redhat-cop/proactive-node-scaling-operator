@@ -8,7 +8,8 @@ metadata:
     certified: "false"
     containerImage: quay.io/redhat-cop/proactive-node-scaling-operator
     createdAt: 2/2/2021
-    description: This operator provides automation proactively scaling nodes before pods het stuck waiting for the cluster autoscaler.
+    description: This operator provides automation proactively scaling nodes before
+      pods het stuck waiting for the cluster autoscaler.
     operatorframework.io/suggested-namespace: proactive-node-scaling-operator
     repository: https://github.com/redhat-cop/proactive-node-scaling-operator
     support: Best Effort
@@ -18,7 +19,8 @@ spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
-    - description: NodeScalingWatermark is the Schema for the nodescalingwatermarks API
+    - description: NodeScalingWatermark is the Schema for the nodescalingwatermarks
+        API
       displayName: Node Scaling Watermark
       kind: NodeScalingWatermark
       name: nodescalingwatermarks.redhatcop.redhat.io
