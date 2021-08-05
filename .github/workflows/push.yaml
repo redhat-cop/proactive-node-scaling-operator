@@ -75,7 +75,7 @@ jobs:
     - name: process bundle for disconnected support
       uses: redhat-cop/github-actions/disconnected-csv@master
       with:
-        CSV_FILE: bundle/manifests/$(basename $GITHUB_REPOSITORY).clusterserviceversion.yaml
+        CSV_FILE: bundle/manifests/proactive-node-scaling-operator.clusterserviceversion.yaml
         TAGS_TO_DIGESTS: ${OPERATOR_IMAGE_TAG}
 
     - name: build chart
