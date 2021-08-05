@@ -95,22 +95,6 @@ jobs:
         username: ${{ secrets.QUAY_USERNAME }}
         password: ${{ secrets.QUAY_PASSWORD }}      
 
-    - name: "Build and Push Operator Image"
-      uses: docker/build-push-action@v2
-      with:
-        context: .
-        file: ./Dockerfile
-        push: true
-        tags: "quay.io/${{ github.repository_owner }}/${{ env.REPOSITORY_NAME }}:${{ env.OPERATOR_IMAGE_TAG }}"
-
-    - name: "Build and Push Bundle Image"
-      uses: docker/build-push-action@v2
-      with:
-        context: .
-        file: ./bundle.Dockerfile
-        push: true
-        tags: "quay.io/${{ github.repository_owner }}/${{ env.REPOSITORY_NAME }}-bundle:${{ env.BUNDLE_IMAGE_TAG }}" 
-
     - name: "Verify bundle image"
       shell: bash
       run: operator-sdk bundle validate quay.io/${{ github.repository_owner }}/$(basename $GITHUB_REPOSITORY)-bundle:${BUNDLE_IMAGE_TAG} --select-optional name=operatorhub    
