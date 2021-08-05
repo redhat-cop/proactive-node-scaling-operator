@@ -233,3 +233,4 @@ operator-sdk cleanup proactive-node-scaling-operator -n proactive-node-scaling-o
 oc delete operatorgroup operator-sdk-og
 oc delete catalogsource proactive-node-scaling-operator-catalog
 ```
+ 
