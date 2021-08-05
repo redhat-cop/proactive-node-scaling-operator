@@ -72,6 +72,12 @@ jobs:
       shell: bash
       run: operator-sdk bundle validate ./bundle --select-optional name=operatorhub
 
+    - name: process bundle for disconnected support
+      uses: redhat-cop/github-actions/disconnected-csv@master
+      with:
+        CSV_FILE: bundle/manifests/$(basename $GITHUB_REPOSITORY).clusterserviceversion.yaml
+        TAGS_TO_DIGESTS: ${OPERATOR_IMAGE_TAG}
+
     - name: build chart
       shell: bash
       run: make helmchart VERSION=${BUNDLE_VERSION} IMG=quay.io/${{ github.repository_owner }}/$(basename $GITHUB_REPOSITORY):${OPERATOR_IMAGE_TAG}      
@@ -190,7 +196,7 @@ jobs:
   release-operatorhub:
     name: Relase to OperatorHub via community-operators (We don't actually commit in this case)
     runs-on: ubuntu-latest
-    if: "startsWith(github.ref, 'refs/tags')"
+#    if: "startsWith(github.ref, 'refs/tags')"
     needs: ["build"]
     steps:
 
@@ -241,7 +247,14 @@ jobs:
           sed -i '/replaces: '"$(basename $GITHUB_REPOSITORY)"'/d' ./bundle/manifests/$(basename $GITHUB_REPOSITORY).clusterserviceversion.yaml
           mkdir -p ./tmp/community-operators/community-operators/$(basename $GITHUB_REPOSITORY)/${VERSION}
           /bin/cp -v -R ./bundle/* ./tmp/community-operators/community-operators/$(basename $GITHUB_REPOSITORY)/${VERSION}
+          ls -al ./tmp/community-operators/community-operators/$(basename $GITHUB_REPOSITORY)/${VERSION}
           /bin/cp -v -R ./config/community-operators/* ./tmp/community-operators/community-operators/$(basename $GITHUB_REPOSITORY)       
+
+      - name: process bundle for disconnected support
+        uses: redhat-cop/github-actions/disconnected-csv@master
+        with:
+          CSV_FILE: ./tmp/community-operators/community-operators/$(basename $GITHUB_REPOSITORY)/${VERSION}/manifests/$(basename $GITHUB_REPOSITORY).clusterserviceversion.yaml
+          TAGS_TO_DIGESTS: ${OPERATOR_IMAGE_TAG}
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
