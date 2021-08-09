@@ -258,7 +258,7 @@ jobs:
       - name: process bundle for disconnected support
         uses: redhat-cop/github-actions/disconnected-csv@master
         with:
-          CSV_FILE: "./tmp/community-operators-prod/community/${{ env.REPOSITORY_NAME }}/${{ env.VERSION }}/manifests/${{ env.REPOSITORY_NAME }}.clusterserviceversion.yaml"
+          CSV_FILE: "./tmp/community-operators-prod/operators/${{ env.REPOSITORY_NAME }}/${{ env.VERSION }}/manifests/${{ env.REPOSITORY_NAME }}.clusterserviceversion.yaml"
           TAGS_TO_DIGESTS: ${OPERATOR_IMAGE_TAG}
 
       - name: Create Pull Request
