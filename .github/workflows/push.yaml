@@ -72,6 +72,12 @@ jobs:
       shell: bash
       run: operator-sdk bundle validate ./bundle --select-optional name=operatorhub
 
+    - name: process bundle for disconnected support
+      uses: redhat-cop/github-actions/disconnected-csv@master
+      with:
+        CSV_FILE: bundle/manifests/${{ env.REPOSITORY_NAME }}.clusterserviceversion.yaml
+        TAGS_TO_DIGESTS: ${OPERATOR_IMAGE_TAG}
+
     - name: build chart
       shell: bash
       run: make helmchart VERSION=${BUNDLE_VERSION} IMG=quay.io/${{ github.repository_owner }}/$(basename $GITHUB_REPOSITORY):${OPERATOR_IMAGE_TAG}      
@@ -81,7 +87,7 @@ jobs:
     
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
-    
+      
     - name: Login to DockerHub
       uses: docker/login-action@v1 
       with:
@@ -242,6 +248,12 @@ jobs:
           mkdir -p ./tmp/community-operators/community-operators/$(basename $GITHUB_REPOSITORY)/${VERSION}
           /bin/cp -v -R ./bundle/* ./tmp/community-operators/community-operators/$(basename $GITHUB_REPOSITORY)/${VERSION}
           /bin/cp -v -R ./config/community-operators/* ./tmp/community-operators/community-operators/$(basename $GITHUB_REPOSITORY)       
+
+      - name: process bundle for disconnected support
+        uses: redhat-cop/github-actions/disconnected-csv@master
+        with:
+          CSV_FILE: "./tmp/community-operators/community-operators/${{ env.REPOSITORY_NAME }}/${{ env.VERSION }}/manifests/${{ env.REPOSITORY_NAME }}.clusterserviceversion.yaml"
+          TAGS_TO_DIGESTS: ${OPERATOR_IMAGE_TAG}
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
