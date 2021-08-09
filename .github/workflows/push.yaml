@@ -204,6 +204,7 @@ jobs:
         shell: bash
         run: | 
           echo "REPOSITORY_NAME=$(basename $GITHUB_REPOSITORY)" >> $GITHUB_ENV
+          echo "CONTEXT_PATH="
 
       - name: Checkout
         uses: actions/checkout@v2
@@ -226,16 +227,16 @@ jobs:
         run: |
           export TAG=${GITHUB_REF/refs\/tags\//}
           echo "VERSION=${TAG:1}" >> $GITHUB_ENV
-      - name: checkout community-operators
+      - name: checkout community-operators-prod
         uses: actions/checkout@v2
         with:
-          repository: operator-framework/community-operators
-          path: ./tmp/community-operators
+          repository: redhat-openshift-ecosystem/community-operators-prod
+          path: ./tmp/community-operators-prod
 
       - name: check whether it is first release
         shell: bash
         run: |
-          echo first_release=$([[ ! -d "./tmp/community-operators/community-operators/$(basename $GITHUB_REPOSITORY)" ]] && echo 'true' || echo 'false') >> $GITHUB_ENV
+          echo first_release=$([[ ! -d "./tmp/community-operators-prod/operators/$(basename $GITHUB_REPOSITORY)" ]] && echo 'true' || echo 'false') >> $GITHUB_ENV
           echo $first_release
 
       
@@ -245,28 +246,28 @@ jobs:
           make bundle IMG=quay.io/${{ github.repository_owner }}/$(basename $GITHUB_REPOSITORY):v${VERSION} VERSION=${VERSION} DEFAULT_CHANNEL=alpha
           sed  's/bundle\///g' bundle.Dockerfile > bundle/Dockerfile
           sed -i '/replaces: '"$(basename $GITHUB_REPOSITORY)"'/d' ./bundle/manifests/$(basename $GITHUB_REPOSITORY).clusterserviceversion.yaml
-          mkdir -p ./tmp/community-operators/community-operators/$(basename $GITHUB_REPOSITORY)/${VERSION}
-          /bin/cp -v -R ./bundle/* ./tmp/community-operators/community-operators/$(basename $GITHUB_REPOSITORY)/${VERSION}
-          /bin/cp -v -R ./config/community-operators/* ./tmp/community-operators/community-operators/$(basename $GITHUB_REPOSITORY)       
+          mkdir -p ./tmp/community-operators-prod/operators/$(basename $GITHUB_REPOSITORY)/${VERSION}
+          /bin/cp -v -R ./bundle/* ./tmp/community-operators-prod/operators/$(basename $GITHUB_REPOSITORY)/${VERSION}
+          /bin/cp -v -R ./config/community-operators/* ./tmp/community-operators-prod/operators/$(basename $GITHUB_REPOSITORY)       
 
       - name: process bundle for disconnected support
         uses: redhat-cop/github-actions/disconnected-csv@master
         with:
-          CSV_FILE: "./tmp/community-operators/community-operators/${{ env.REPOSITORY_NAME }}/${{ env.VERSION }}/manifests/${{ env.REPOSITORY_NAME }}.clusterserviceversion.yaml"
+          CSV_FILE: "./tmp/community-operators-prod/community/${{ env.REPOSITORY_NAME }}/${{ env.VERSION }}/manifests/${{ env.REPOSITORY_NAME }}.clusterserviceversion.yaml"
           TAGS_TO_DIGESTS: ${OPERATOR_IMAGE_TAG}
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
         if: ${{ startsWith( env.first_release, 'true' ) }}
         with:
-          path: ./tmp/community-operators
+          path: ./tmp/community-operators-prod
           commit-message: ${{ env.REPOSITORY_NAME }} release ${{ env.VERSION }}
           committer: ${{ github.actor }} <raffaele.spazzoli@gmail.com>
           author: ${{ github.actor }} <raffaele.spazzoli@gmail.com>
           signoff: true
           branch: ${{ env.REPOSITORY_NAME }}-${{ env.VERSION }}
           delete-branch: true
-          push-to-fork: ${{ github.repository_owner }}/community-operators
+          push-to-fork: ${{ github.repository_owner }}/community-operators-prod
           title: ${{ env.REPOSITORY_NAME }} initial commit
           body: |
             ### New Submissions
