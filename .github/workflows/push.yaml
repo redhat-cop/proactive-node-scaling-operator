@@ -75,7 +75,7 @@ jobs:
     - name: process bundle for disconnected support
       uses: redhat-cop/github-actions/disconnected-csv@master
       with:
-        CSV_FILE: bundle/manifests/proactive-node-scaling-operator.clusterserviceversion.yaml
+        CSV_FILE: bundle/manifests/${{ env.REPOSITORY_NAME }}.clusterserviceversion.yaml
         TAGS_TO_DIGESTS: ${OPERATOR_IMAGE_TAG}
 
     - name: build chart
@@ -180,7 +180,7 @@ jobs:
   release-operatorhub:
     name: Relase to OperatorHub via community-operators (We don't actually commit in this case)
     runs-on: ubuntu-latest
-#    if: "startsWith(github.ref, 'refs/tags')"
+    if: "startsWith(github.ref, 'refs/tags')"
     needs: ["build"]
     steps:
 
@@ -237,7 +237,7 @@ jobs:
       - name: process bundle for disconnected support
         uses: redhat-cop/github-actions/disconnected-csv@master
         with:
-          CSV_FILE: ./tmp/community-operators/community-operators/$(basename $GITHUB_REPOSITORY)/${VERSION}/manifests/$(basename $GITHUB_REPOSITORY).clusterserviceversion.yaml
+          CSV_FILE: "./tmp/community-operators/community-operators/${{ env.REPOSITORY_NAME }}/${{ env.VERSION }}/manifests/${{ env.REPOSITORY_NAME }}.clusterserviceversion.yaml"
           TAGS_TO_DIGESTS: ${OPERATOR_IMAGE_TAG}
 
       - name: Create Pull Request
