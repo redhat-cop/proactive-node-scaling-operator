@@ -57,12 +57,11 @@ The `nodeSelector` selects the nodes observed by this operator, which are also t
 The `watermarkPercentage` define the percentage of capacity of user workload that will be allocated to low priority pods. So in this example 20% of the user allocated capacity will be allocated via low priority pods. This also means that when the user workload reaches 80% capacity of the nodes selected by this CR (and the autoscaler), the cluster will start to scale.
 
 ## Deploying the Operator
+> :lock: **Disconnected Installation Supported**
 
 This is a cluster-level operator that you can deploy in any namespace, `proactive-node-scaling-operator` is recommended.
 
 It is recommended to deploy this operator via [`OperatorHub`](https://operatorhub.io/), but you can also deploy it using [`Helm`](https://helm.sh/).
-
-> :lock: **Disconnected Installation Supported**
 
 ### Deploying from OperatorHub
 
