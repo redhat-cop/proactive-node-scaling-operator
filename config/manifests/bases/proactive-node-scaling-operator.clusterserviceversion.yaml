@@ -13,6 +13,7 @@ metadata:
     operatorframework.io/suggested-namespace: proactive-node-scaling-operator
     repository: https://github.com/redhat-cop/proactive-node-scaling-operator
     support: Best Effort
+    operators.openshift.io/infrastructure-features: '["Disconnected"]'
   name: proactive-node-scaling-operator.v0.0.0
   namespace: placeholder
 spec:
