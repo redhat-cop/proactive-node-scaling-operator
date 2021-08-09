@@ -97,7 +97,7 @@ jobs:
 
     - name: "Verify bundle image"
       shell: bash
-      run: operator-sdk bundle validate quay.io/cnuland/$(basename $GITHUB_REPOSITORY)-bundle:${BUNDLE_IMAGE_TAG} --select-optional name=operatorhub    
+      run: operator-sdk bundle validate quay.io/${{ github.repository_owner }}/$(basename $GITHUB_REPOSITORY)-bundle:${BUNDLE_IMAGE_TAG} --select-optional name=operatorhub    
       
   release-helm-chart:
     name: Helm Chart Release      
