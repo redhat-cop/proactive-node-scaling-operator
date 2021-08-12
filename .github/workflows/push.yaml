@@ -77,6 +77,8 @@ jobs:
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v1
+      with:
+        platforms: all      
     
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
@@ -93,6 +95,7 @@ jobs:
       with:
         context: .
         file: ./Dockerfile
+        platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/s390x
         push: true
         tags: "quay.io/${{ github.repository_owner }}/${{ env.REPOSITORY_NAME }}:${{ env.OPERATOR_IMAGE_TAG }}"
 
@@ -101,6 +104,7 @@ jobs:
       with:
         context: .
         file: ./bundle.Dockerfile
+        platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/s390x
         push: true
         tags: "quay.io/${{ github.repository_owner }}/${{ env.REPOSITORY_NAME }}-bundle:${{ env.BUNDLE_IMAGE_TAG }}" 
 
@@ -387,6 +391,4 @@ jobs:
             <sup>1</sup> If you feel your Operator does not fit any of the pre-defined categories, file a PR against this repo and explain your need
 
             <sup>2</sup> For more information see [here](https://github.com/operator-framework/operator-sdk/blob/master/doc/images/operator-capability-level.svg)
-          token:  ${{ secrets.COMMUNITY_OPERATOR_PAT }}         
-     
-
+          token:  ${{ secrets.COMMUNITY_OPERATOR_PAT }}

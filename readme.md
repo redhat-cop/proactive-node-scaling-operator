@@ -63,6 +63,7 @@ This is a cluster-level operator that you can deploy in any namespace, `proactiv
 It is recommended to deploy this operator via [`OperatorHub`](https://operatorhub.io/), but you can also deploy it using [`Helm`](https://helm.sh/).
 
 ### Deploying from OperatorHub
+
 > **Note**: This operator supports being installed disconnected environments
 
 If you want to utilize the Operator Lifecycle Manager (OLM) to install this operator, you can do so in two ways: from the UI or the CLI.
