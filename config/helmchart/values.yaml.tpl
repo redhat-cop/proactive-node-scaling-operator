@@ -29,9 +29,9 @@ affinity: {}
 
 kube_rbac_proxy:
   image:
-    repository: quay.io/coreos/kube-rbac-proxy
+    repository: quay.io/brancz/kube-rbac-proxy
     pullPolicy: IfNotPresent
-    tag: v0.5.0
+    tag: v0.11.0
   resources:
     requests:
       cpu: 100m
