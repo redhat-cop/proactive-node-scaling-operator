@@ -29,7 +29,7 @@ affinity: {}
 
 kube_rbac_proxy:
   image:
-    repository: quay.io/brancz/kube-rbac-proxy
+    repository: gcr.io/kubebuilder/kube-rbac-proxy:v0.8.0
     pullPolicy: IfNotPresent
     tag: v0.11.0
   resources:
