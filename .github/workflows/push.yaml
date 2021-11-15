@@ -11,7 +11,7 @@ env:
   DEFAULT_BUNDLE_VERSION: "0.0.1"
   DEFAULT_BUNDLE_CHANNEL: "alpha"
   DEFAULT_OPERATOR_VERSION: "latest"
-  OPERATOR_SDK_VERSION: "v1.9.0"
+  OPERATOR_SDK_VERSION: "v1.13.1"
   BUILD_PLATFORMS: "linux/amd64,linux/arm64,linux/ppc64le"
   HELM_REPO_DIR: "./tmp/gh-pages"
 
@@ -583,7 +583,7 @@ jobs:
           sed -i '/replaces: '"${{ env.REPOSITORY_NAME }}"'/d' ./bundle/manifests/${{ env.REPOSITORY_NAME }}.clusterserviceversion.yaml
           mkdir -p ./tmp/${{ env.COMMUNITY_OPERATORS_REPOSITORY_NAME }}/operators/${{ env.REPOSITORY_NAME }}/${{ env.BUNDLE_VERSION }}
           /bin/cp -v -R ./bundle/* ./tmp/${{ env.COMMUNITY_OPERATORS_REPOSITORY_NAME }}/operators/${{ env.REPOSITORY_NAME }}/${{ env.BUNDLE_VERSION }}
-          /bin/cp -v -R ./config/community-operators/*.yaml ./tmp/${{ env.COMMUNITY_OPERATORS_REPOSITORY_NAME }}/operators/${{ env.REPOSITORY_NAME }}
+          /bin/cp -v -R ./config/community-operators/ci.yaml ./tmp/${{ env.COMMUNITY_OPERATORS_REPOSITORY_NAME }}/operators/${{ env.REPOSITORY_NAME }}
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3

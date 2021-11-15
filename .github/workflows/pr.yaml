@@ -9,7 +9,7 @@ env:
   DEFAULT_BUNDLE_VERSION: "0.0.1"
   DEFAULT_BUNDLE_CHANNEL: "alpha"
   DEFAULT_OPERATOR_VERSION: "latest"
-  OPERATOR_SDK_VERSION: "v1.9.0"
+  OPERATOR_SDK_VERSION: "v1.13.1"
   BUILD_PLATFORMS: "linux/amd64,linux/arm64,linux/ppc64le"
 
 jobs:
