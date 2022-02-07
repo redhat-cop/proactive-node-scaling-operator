@@ -32,7 +32,7 @@ spec:
       name: nodescalingwatermarks.redhatcop.redhat.io
       version: v1alpha1
   description: |
-    This operator makes the [cluster autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler) more proactive. As of now the cluster auto scaler will create new nodes only when a pod is pending because it cannot be allocated due to lack of capacity. This is not a goos user experience as the pending workload has to wait for several minutes as the new node is create and joins the cluster.
+    This operator makes the [cluster autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler) more proactive. As of now the cluster auto scaler will create new nodes only when a pod is pending because it cannot be allocated due to lack of capacity. This is not a good user experience as the pending workload has to wait for several minutes as the new node is create and joins the cluster.
 
     The Proactive Node Scaling Operator improves the user experience by allocating low priority pods that don't do anything. When the cluster is full and a new user pod is created the following happens:
 
