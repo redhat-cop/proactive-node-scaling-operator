@@ -13,4 +13,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: quay.io/raffaelespazzoli/proactive-node-scaling-operator
-  newTag: latest
+  newTag: latest@sha256:2596964c2c4c88b4120ace715702f3505cfdaf46f064acb56f6f649dbc0480ad
