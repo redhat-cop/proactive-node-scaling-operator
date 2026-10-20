@@ -3,7 +3,7 @@ module github.com/redhat-cop/proactive-node-scaling-operator
 go 1.26.10
 
 require (
-	github.com/go-logr/logr v1.2.4
+	github.com/go-logr/logr v1.4.4
 	github.com/redhat-cop/operator-utils v1.3.8
 	k8s.io/api v0.28.2
 	k8s.io/apimachinery v0.28.2
