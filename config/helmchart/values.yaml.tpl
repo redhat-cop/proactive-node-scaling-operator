@@ -29,9 +29,9 @@ affinity: {}
 
 kube_rbac_proxy:
   image:
-    repository:  quay.io/redhat-cop/kube-rbac-proxy
+    repository: "" # Defaults to the operator image, which includes /kube-rbac-proxy.
     pullPolicy: IfNotPresent
-    tag: v0.11.0
+    tag: ""
   resources:
     requests:
       cpu: 100m

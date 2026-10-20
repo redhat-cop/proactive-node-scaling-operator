@@ -25,6 +25,9 @@ spec:
     spec:
       serviceAccountName: controller-manager
       containers:
+      - name: kube-rbac-proxy
+        image: controller:latest
+        command: ["/kube-rbac-proxy"]
       - command:
         - /manager
         args:

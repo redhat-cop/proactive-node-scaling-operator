@@ -29,6 +29,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/redhat-cop/operator-utils/pkg/util"
 	"github.com/redhat-cop/operator-utils/pkg/util/lockedresourcecontroller"
+	"github.com/redhat-cop/operator-utils/pkg/util/templates"
 	redhatcopv1alpha1 "github.com/redhat-cop/proactive-node-scaling-operator/api/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -44,7 +45,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
 const annotationBase = "proactive-node-scaling-operator.redhat-cop.io"
@@ -130,7 +130,7 @@ func (r *NodeScalingWatermarkReconciler) Reconcile(context context.Context, req 
 		Replicas:             replicas,
 	}
 
-	obj, err := util.ProcessTemplate(templateData, r.watermarkDeploymentTemplate)
+	obj, err := templates.ProcessTemplate(context, templateData, r.watermarkDeploymentTemplate)
 
 	//objs, err := r.processTemplate(instance, data)
 	if err != nil {
@@ -259,7 +259,7 @@ func (r *NodeScalingWatermarkReconciler) initializeTemplate() (*template.Templat
 		r.Log.Error(err, "Error reading job template file", "filename", templateFileName)
 		return &template.Template{}, err
 	}
-	watermarkDeploymentTemplate, err := template.New("WatermarkDeployment").Funcs(util.AdvancedTemplateFuncMap(r.GetRestConfig())).Parse(string(text))
+	watermarkDeploymentTemplate, err := template.New("WatermarkDeployment").Funcs(templates.AdvancedTemplateFuncMap(r.GetRestConfig(), r.Log)).Parse(string(text))
 	if err != nil {
 		r.Log.Error(err, "Error parsing template", "template", string(text))
 		return &template.Template{}, err
@@ -320,11 +320,11 @@ func (r *NodeScalingWatermarkReconciler) SetupWithManager(mgr ctrl.Manager) erro
 
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&redhatcopv1alpha1.NodeScalingWatermark{}, builder.WithPredicates(util.ResourceGenerationOrFinalizerChangedPredicate{})).
-		Watches(&source.Kind{Type: &corev1.Pod{
+		Watches(&corev1.Pod{
 			TypeMeta: metav1.TypeMeta{
 				Kind: "Pod",
 			},
-		}}, &enqueForScalingWatermarksSelectingNodeHostingPod{
+		}, &enqueForScalingWatermarksSelectingNodeHostingPod{
 			r:   r,
 			log: r.Log.WithName("enqueForScalingWatermarksSelectingNodeHostingPod"),
 		}, builder.WithPredicates(&IsRequestChanged)).
@@ -362,7 +362,7 @@ type enqueForScalingWatermarksSelectingNodeHostingPod struct {
 }
 
 // trigger a egressIPAM reconcile event for those egressIPAM objects that reference this hostsubnet indireclty via the corresponding node.
-func (e *enqueForScalingWatermarksSelectingNodeHostingPod) Create(evt event.CreateEvent, q workqueue.RateLimitingInterface) {
+func (e *enqueForScalingWatermarksSelectingNodeHostingPod) Create(_ context.Context, evt event.CreateEvent, q workqueue.RateLimitingInterface) {
 	pod, ok := evt.Object.(*corev1.Pod)
 	if !ok {
 		e.log.Info("unable convert event object to pod,", "event", evt)
@@ -406,7 +406,7 @@ func (e *enqueForScalingWatermarksSelectingNodeHostingPod) processReferringNodeS
 
 // Update implements EventHandler
 // trigger a router reconcile event for those routes that reference this secret
-func (e *enqueForScalingWatermarksSelectingNodeHostingPod) Update(evt event.UpdateEvent, q workqueue.RateLimitingInterface) {
+func (e *enqueForScalingWatermarksSelectingNodeHostingPod) Update(_ context.Context, evt event.UpdateEvent, q workqueue.RateLimitingInterface) {
 	pod, ok := evt.ObjectNew.(*corev1.Pod)
 	if !ok {
 		e.log.Info("unable convert event object to pod,", "event", evt)
@@ -416,7 +416,7 @@ func (e *enqueForScalingWatermarksSelectingNodeHostingPod) Update(evt event.Upda
 }
 
 // Delete implements EventHandler
-func (e *enqueForScalingWatermarksSelectingNodeHostingPod) Delete(evt event.DeleteEvent, q workqueue.RateLimitingInterface) {
+func (e *enqueForScalingWatermarksSelectingNodeHostingPod) Delete(_ context.Context, evt event.DeleteEvent, q workqueue.RateLimitingInterface) {
 	pod, ok := evt.Object.(*corev1.Pod)
 	if !ok {
 		e.log.Info("unable convert event object to pod,", "event", evt)
@@ -426,6 +426,6 @@ func (e *enqueForScalingWatermarksSelectingNodeHostingPod) Delete(evt event.Dele
 }
 
 // Generic implements EventHandler
-func (e *enqueForScalingWatermarksSelectingNodeHostingPod) Generic(evt event.GenericEvent, q workqueue.RateLimitingInterface) {
+func (e *enqueForScalingWatermarksSelectingNodeHostingPod) Generic(_ context.Context, evt event.GenericEvent, q workqueue.RateLimitingInterface) {
 	return
 }

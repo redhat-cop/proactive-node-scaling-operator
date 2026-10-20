@@ -1,3 +1,6 @@
+//go:build integration
+// +build integration
+
 /*
 Copyright 2021 Red Hat Community of Practice.
 
@@ -17,63 +20,120 @@ limitations under the License.
 package controllers
 
 import (
+	"context"
 	"path/filepath"
 	"testing"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-	"k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/client-go/rest"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	"github.com/go-logr/logr"
+	"github.com/redhat-cop/operator-utils/pkg/util/lockedresourcecontroller"
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	redhatcopv1alpha1 "github.com/redhat-cop/proactive-node-scaling-operator/api/v1alpha1"
-	// +kubebuilder:scaffold:imports
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/envtest"
 )
 
-// These tests use Ginkgo (BDD-style Go testing framework). Refer to
-// http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
-
-var cfg *rest.Config
-var k8sClient client.Client
-var testEnv *envtest.Environment
-
+// TestAPIs verifies the checked-in CRD can be installed and defaults are applied.
 func TestAPIs(t *testing.T) {
-	RegisterFailHandler(Fail)
-
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"Controller Suite",
-		[]Reporter{printer.NewlineReporter{}})
-}
-
-var _ = BeforeSuite(func() {
-	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
-
-	By("bootstrapping test environment")
-	testEnv = &envtest.Environment{
-		CRDDirectoryPaths: []string{filepath.Join("..", "config", "crd", "bases")},
+	testEnv := &envtest.Environment{
+		CRDDirectoryPaths:     []string{filepath.Join("..", "config", "crd", "bases")},
+		ErrorIfCRDPathMissing: true,
+	}
+	cfg, err := testEnv.Start()
+	if err != nil {
+		t.Fatalf("start envtest: %v", err)
+	}
+	t.Cleanup(func() {
+		if err := testEnv.Stop(); err != nil {
+			t.Errorf("stop envtest: %v", err)
+		}
+	})
+	scheme := runtime.NewScheme()
+	if err := corev1.AddToScheme(scheme); err != nil {
+		t.Fatal(err)
+	}
+	if err := appsv1.AddToScheme(scheme); err != nil {
+		t.Fatal(err)
+	}
+	if err := redhatcopv1alpha1.AddToScheme(scheme); err != nil {
+		t.Fatal(err)
+	}
+	apiClient, err := client.New(cfg, client.Options{Scheme: scheme})
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+	watermark := &unstructured.Unstructured{Object: map[string]interface{}{
+		"apiVersion": "redhatcop.redhat.io/v1alpha1",
+		"kind":       "NodeScalingWatermark",
+		"metadata":   map[string]interface{}{"name": "smoke-test", "namespace": "default"},
+		"spec":       map[string]interface{}{"watermarkPercentage": int64(20)},
+	}}
+	if err := apiClient.Create(ctx, watermark); err != nil {
+		t.Fatal(err)
+	}
+	stored := &redhatcopv1alpha1.NodeScalingWatermark{}
+	if err := apiClient.Get(ctx, client.ObjectKeyFromObject(watermark), stored); err != nil {
+		t.Fatal(err)
+	}
+	if stored.Spec.PriorityClassName != "proactive-node-autoscaling-pods" || len(stored.Spec.PausePodSize) != 2 {
+		t.Fatalf("CRD defaults missing: %+v", stored.Spec)
+	}
+	// Exercise the upgraded template/status helpers through a real reconcile.
+	if err := apiClient.Create(ctx, &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: "worker", Labels: stored.Spec.NodeSelector}}); err != nil {
+		t.Fatal(err)
+	}
+	if err := apiClient.Create(ctx, &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "workload"}}); err != nil {
+		t.Fatal(err)
+	}
+	pod := &corev1.Pod{
+		ObjectMeta: metav1.ObjectMeta{Name: "workload", Namespace: "workload"},
+		Spec:       corev1.PodSpec{NodeName: "worker", Containers: []corev1.Container{{Name: "app", Image: "registry.k8s.io/pause:3.10.2", Resources: corev1.ResourceRequirements{Requests: corev1.ResourceList{corev1.ResourceCPU: resource.MustParse("1")}}}}},
+	}
+	if err := apiClient.Create(ctx, pod); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv(templateFileNameEnv, filepath.Join("..", "config", "templates", "watermarkDeploymentTemplate.yaml"))
+	reconciler := &NodeScalingWatermarkReconciler{
+		EnforcingReconciler: lockedresourcecontroller.NewEnforcingReconciler(apiClient, scheme, cfg, apiClient, nil, true, false),
+		Log:                 logr.Discard(),
+	}
+	reconciler.watermarkDeploymentTemplate, err = reconciler.initializeTemplate()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := reconciler.Reconcile(ctx, ctrl.Request{NamespacedName: types.NamespacedName{Name: stored.Name, Namespace: stored.Namespace}}); err != nil {
+		t.Fatal(err)
+	}
+	deployment := &appsv1.Deployment{}
+	if err := apiClient.Get(ctx, client.ObjectKeyFromObject(stored), deployment); err != nil {
+		t.Fatal(err)
+	}
+	if deployment.Spec.Replicas == nil || *deployment.Spec.Replicas != 1 {
+		t.Fatalf("unexpected replicas: %v", deployment.Spec.Replicas)
+	}
+	if deployment.Spec.Template.Spec.PriorityClassName != stored.Spec.PriorityClassName {
+		t.Fatal("template did not preserve priority class")
+	}
+	if err := apiClient.Get(ctx, client.ObjectKeyFromObject(stored), stored); err != nil {
+		t.Fatal(err)
+	}
+	if len(stored.Status.Conditions) == 0 {
+		t.Fatal("reconcile did not update status")
 	}
 
-	cfg, err := testEnv.Start()
-	Expect(err).NotTo(HaveOccurred())
-	Expect(cfg).NotTo(BeNil())
-
-	err = redhatcopv1alpha1.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
-
-	// +kubebuilder:scaffold:scheme
-
-	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme.Scheme})
-	Expect(err).NotTo(HaveOccurred())
-	Expect(k8sClient).NotTo(BeNil())
-
-}, 60)
-
-var _ = AfterSuite(func() {
-	By("tearing down the test environment")
-	err := testEnv.Stop()
-	Expect(err).NotTo(HaveOccurred())
-})
+	invalid := stored.DeepCopy()
+	invalid.Name = "invalid-watermark"
+	invalid.ResourceVersion = ""
+	invalid.Spec.WatermarkPercentage = 101
+	if err := apiClient.Create(ctx, invalid); err == nil {
+		t.Fatal("expected percentage above 100 to be rejected")
+	}
+}

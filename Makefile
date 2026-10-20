@@ -1,6 +1,6 @@
 CHART_REPO_URL ?= http://example.com
 HELM_REPO_DEST ?= /tmp/gh-pages
-OPERATOR_NAME ?=$(shell basename -z `pwd`)
+OPERATOR_NAME ?= $(notdir $(CURDIR))
 
 # VERSION defines the project version for the bundle.
 # Update this value when you upgrade the version of your project.
@@ -42,7 +42,7 @@ BUNDLE_IMG ?= $(IMAGE_TAG_BASE)-bundle:v$(VERSION)
 # Image URL to use all building/pushing image targets
 IMG ?= controller:latest
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
-CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false"
+CRD_OPTIONS ?= "crd:crdVersions=v1"
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -78,10 +78,10 @@ help: ## Display this help.
 ##@ Development
 
 manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./api/...;./controllers/..." output:crd:artifacts:config=config/crd/bases
 
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
-	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./api/...;./controllers/..."
 
 fmt: ## Run go fmt against code.
 	go fmt ./...
@@ -89,15 +89,48 @@ fmt: ## Run go fmt against code.
 vet: ## Run go vet against code.
 	go vet ./...
 
-ENVTEST_ASSETS_DIR=$(shell pwd)/testbin
-test: manifests generate fmt vet ## Run tests.
-	mkdir -p ${ENVTEST_ASSETS_DIR}
-	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.8.3/hack/setup-envtest.sh
-	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test ./... -coverprofile cover.out
+# Keep test tooling isolated from the operator's dependency graph.
+ENVTEST = $(CURDIR)/bin/setup-envtest
+ENVTEST_VERSION ?= v0.0.0-20250517180713-32e5e9e948a5
+ENVTEST_K8S_VERSION ?= 1.28.0
+
+.PHONY: test test-integration setup-envtest health security
+
+test: ## Run unit tests without a Kubernetes cluster.
+	go test -race -count=1 ./... -coverprofile cover.out
+
+setup-envtest: ## Install the pinned envtest binary downloader.
+	@test -x $(ENVTEST) || GOBIN=$(CURDIR)/bin go install sigs.k8s.io/controller-runtime/tools/setup-envtest@$(ENVTEST_VERSION)
+
+test-integration: setup-envtest ## Test CRD installation and API operations against a local API server.
+	KUBEBUILDER_ASSETS="$$( $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(CURDIR)/testbin -p path )" go test -race -count=1 -tags=integration ./...
+
+# The module proxy can return transient transport errors. Retry downloads only;
+# checksum verification, builds, and tests still fail immediately on errors.
+health: ## Verify dependencies, static analysis, build, and unit tests.
+	@for attempt in 1 2 3; do \
+		if go mod download; then break; fi; \
+		if [ "$$attempt" -eq 3 ]; then exit 1; fi; \
+		echo "Dependency download failed; retrying ($$attempt/3)..." >&2; \
+		sleep 5; \
+	done
+	go mod verify
+	go vet ./...
+	go build -mod=readonly ./...
+	$(MAKE) test
+
+PROXY_GO_TOOLCHAIN ?= go1.27.3
+build-proxy: ## Build the pinned, security-patched metrics proxy.
+	cd tools/kube-rbac-proxy && GOTOOLCHAIN=$(PROXY_GO_TOOLCHAIN) CGO_ENABLED=0 go build -mod=readonly -o ../../bin/kube-rbac-proxy github.com/brancz/kube-rbac-proxy/cmd/kube-rbac-proxy
+
+GOVULNCHECK_VERSION ?= v1.1.4
+security: ## Check imported Go packages for known vulnerabilities.
+	go run golang.org/x/vuln/cmd/govulncheck@$(GOVULNCHECK_VERSION) -scan=package ./...
+	cd tools/kube-rbac-proxy && GOTOOLCHAIN=$(PROXY_GO_TOOLCHAIN) go run golang.org/x/vuln/cmd/govulncheck@$(GOVULNCHECK_VERSION) -scan=package github.com/brancz/kube-rbac-proxy/cmd/kube-rbac-proxy
 
 ##@ Build
 
-build: generate fmt vet ## Build manager binary.
+build: generate fmt vet build-proxy ## Build manager binary.
 	go build -o bin/manager main.go
 
 run: manifests generate fmt vet ## Run a controller from your host.
@@ -127,23 +160,19 @@ undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/confi
 
 CONTROLLER_GEN = $(shell pwd)/bin/controller-gen
 controller-gen: ## Download controller-gen locally if necessary.
-	$(call go-get-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.1)
+	$(call go-get-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen@v0.20.0)
 
 KUSTOMIZE = $(shell pwd)/bin/kustomize
 kustomize: ## Download kustomize locally if necessary.
-	$(call go-get-tool,$(KUSTOMIZE),sigs.k8s.io/kustomize/kustomize/v3@v3.8.7)
+	$(call go-get-tool,$(KUSTOMIZE),sigs.k8s.io/kustomize/kustomize/v5@v5.8.1)
 
-#go-get-tool will 'go get' any package $2 and install it to $1.
+# go-get-tool installs a pinned tool without modifying the operator module.
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 define go-get-tool
 @[ -f $(1) ] || { \
 set -e ;\
-TMP_DIR=$$(mktemp -d) ;\
-cd $$TMP_DIR ;\
-go mod init tmp ;\
 echo "Downloading $(2)" ;\
-GOBIN=$(PROJECT_DIR)/bin go get $(2) ;\
-rm -rf $$TMP_DIR ;\
+GOBIN=$(PROJECT_DIR)/bin go install $(2) ;\
 }
 endef
 
@@ -212,7 +241,8 @@ helmchart: kustomize
 	if [ -d "./config/crd" ]; then $(KUSTOMIZE) build ./config/crd > ./charts/${OPERATOR_NAME}/crds/crds.yaml; fi
 	version=${VERSION} envsubst < ./config/helmchart/Chart.yaml.tpl  > ./charts/${OPERATOR_NAME}/Chart.yaml
 	version=${VERSION} image_repo=$${IMG%:*} envsubst < ./config/helmchart/values.yaml.tpl  > ./charts/${OPERATOR_NAME}/values.yaml
-	sed -i '/^apiVersion: monitoring.coreos.com/i {{ if .Values.enableMonitoring }}' ./charts/${OPERATOR_NAME}/templates/rbac.yaml
+	awk '/^apiVersion: monitoring.coreos.com/ {print "{{ if .Values.enableMonitoring }}"} {print}' ./charts/${OPERATOR_NAME}/templates/rbac.yaml > ./charts/${OPERATOR_NAME}/templates/rbac.yaml.tmp
+	mv ./charts/${OPERATOR_NAME}/templates/rbac.yaml.tmp ./charts/${OPERATOR_NAME}/templates/rbac.yaml
 	echo {{ end }} >> ./charts/${OPERATOR_NAME}/templates/rbac.yaml
 	helm lint ./charts/${OPERATOR_NAME}	
 
