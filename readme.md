@@ -1,8 +1,8 @@
 # Proactive Node Scaling Operator
 
-![build status](https://github.com/redhat-cop/proactive-node-scaling-operator/workflows/push/badge.svg)
-[![Go Report Card](https://goreportcard.com/badge/github.com/redhat-cop/proactive-node-scaling-operator)](https://goreportcard.com/report/github.com/redhat-cop/proactive-node-scaling-operator)
-![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/redhat-cop/proactive-node-scaling-operator)
+[![Build status](https://github.com/redhat-cop/proactive-node-scaling-operator/actions/workflows/push.yaml/badge.svg)](https://github.com/redhat-cop/proactive-node-scaling-operator/actions/workflows/push.yaml)
+[![Go code quality](https://github.com/redhat-cop/proactive-node-scaling-operator/actions/workflows/quality.yaml/badge.svg)](https://github.com/redhat-cop/proactive-node-scaling-operator/actions/workflows/quality.yaml)
+[![Go version](https://img.shields.io/github/go-mod/go-version/redhat-cop/proactive-node-scaling-operator)](https://github.com/redhat-cop/proactive-node-scaling-operator/blob/master/go.mod)
 
 This operator makes the [cluster autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler) more proactive. As of now the cluster auto scaler will create new nodes only when a pod is pending because it cannot be allocated due to lack of capacity. This is not a good user experience as the pending workload has to wait for several minutes as the new node is create and joins the cluster.
 

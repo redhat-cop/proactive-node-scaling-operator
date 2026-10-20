@@ -17,7 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"github.com/redhat-cop/operator-utils/pkg/util/apis"
+	apis "github.com/redhat-cop/operator-utils/api/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -52,7 +52,7 @@ type NodeScalingWatermarkSpec struct {
 	PausePodSize corev1.ResourceList `json:"pausePodSize"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default:="k8s.gcr.io/pause"
+	// +kubebuilder:default:="registry.k8s.io/pause:3.10.2"
 	PausePodImage string `json:"pausePodImage"`
 
 	// PriorityClassName is the priorityClassName assigned to the pause pods, if not set it will be default to proactive-node-autoscaling-pods

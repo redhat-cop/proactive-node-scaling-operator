@@ -28,12 +28,11 @@ spec:
       - args:
         - --secure-listen-address=0.0.0.0:8443
         - --upstream=http://127.0.0.1:8080/
-        - --logtostderr=true
         - --tls-cert-file=/etc/certs/tls/tls.crt
         - --tls-private-key-file=/etc/certs/tls/tls.key
-        - --v=10
-        image: "{{ .Values.kube_rbac_proxy.image.repository }}:{{ .Values.kube_rbac_proxy.image.tag | default "v0.5.0" }}"
+        image: "{{ .Values.kube_rbac_proxy.image.repository | default .Values.image.repository }}:{{ .Values.kube_rbac_proxy.image.tag | default .Values.image.tag | default .Chart.AppVersion }}"
         name: kube-rbac-proxy
+        command: ["/kube-rbac-proxy"]
         ports:
         - containerPort: 8443
           name: https

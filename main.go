@@ -81,7 +81,7 @@ func main() {
 	}
 
 	if err = (&controllers.NodeScalingWatermarkReconciler{
-		EnforcingReconciler: lockedresourcecontroller.NewFromManager(mgr, mgr.GetEventRecorderFor("NodeScalingWatermark_controller"), true),
+		EnforcingReconciler: lockedresourcecontroller.NewFromManager(mgr, "NodeScalingWatermark_controller", true, false),
 		Log:                 ctrl.Log.WithName("controllers").WithName("NodeScalingWatermark"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "NodeScalingWatermark")

@@ -11,4 +11,3 @@ keywords:
   - monitoring
 sources:
   - https://github.com/redhat-cop/proactive-node-scaling-operator
-engine: gotpl
