@@ -21,8 +21,8 @@ COPY controllers/ controllers/
 # Build
 RUN CGO_ENABLED=0 GOOS=linux go build -a -o manager main.go
 
-# Use UBI 9 minimal to package the manager binary
-FROM registry.access.redhat.com/ubi9/ubi-minimal
+# Use UBI 9 Micro to package the manager binary
+FROM registry.access.redhat.com/ubi9/ubi-micro
 WORKDIR /
 COPY --from=builder /workspace/manager .
 COPY --from=builder /workspace/kube-rbac-proxy .
